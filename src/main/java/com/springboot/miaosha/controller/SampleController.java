@@ -28,8 +28,6 @@ public class SampleController {
     @Autowired
     RedisService redisService;
 
-
-
     //1.rest api json 输出
     //2.页面
 

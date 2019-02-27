@@ -1,16 +1,18 @@
 package com.springboot.miaosha.controller;
 
-import com.springboot.miaosha.domain.User;
 import com.springboot.miaosha.redis.RedisService;
-import com.springboot.miaosha.redis.UserKey;
-import com.springboot.miaosha.result.CodeMsg;
 import com.springboot.miaosha.result.Result;
-import com.springboot.miaosha.service.UserService;
+import com.springboot.miaosha.service.MiaoshaUserService;
+import com.springboot.miaosha.vo.LoginVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 /**
  * @Author: lei
@@ -21,8 +23,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/login")
 public class LoginController {
 
+    private static Logger log = LoggerFactory.getLogger(LoginController.class);
+
     @Autowired
-    UserService userService;
+    MiaoshaUserService miaoshaUserService;
 
     @Autowired
     RedisService redisService;
@@ -34,9 +38,12 @@ public class LoginController {
 
     @RequestMapping("/do_login")
     @ResponseBody
-    public Result<Boolean> doLogin() {
-        return null;
+    public Result<Boolean> doLogin(HttpServletResponse response, @Valid LoginVo loginVo) {
+        log.info(loginVo.toString());
+
+        //登录
+        miaoshaUserService.login(response, loginVo);
+        return Result.success(true);
     }
 
 }
-
