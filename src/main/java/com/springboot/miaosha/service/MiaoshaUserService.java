@@ -1,5 +1,6 @@
 package com.springboot.miaosha.service;
 
+import com.alibaba.druid.util.StringUtils;
 import com.springboot.miaosha.dao.MiaoshaUserDao;
 import com.springboot.miaosha.domain.MiaoshaUser;
 import com.springboot.miaosha.exception.GlobalException;
@@ -24,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 public class MiaoshaUserService {
 
-    private static final String COOKIE_NAME_TOKEN = "token";
+    public static final String COOKIE_NAME_TOKEN = "token";
 
     @Autowired
     MiaoshaUserDao miaoshaUserDao;
@@ -57,14 +58,29 @@ public class MiaoshaUserService {
             throw new GlobalException(CodeMsg.PASSWORD_ERROR);
         }
 
+        addCookie(response, user);
+        return true;
+    }
+
+    private void addCookie(HttpServletResponse response, MiaoshaUser user) {
         //生成cookie
         String token = UUIDUtil.uuid();
         redisService.set(MiaoshaUserKey.token, token, user);
         Cookie cookie = new Cookie(COOKIE_NAME_TOKEN, token);
         cookie.setMaxAge(MiaoshaUserKey.token.expireSecounds());
         cookie.setPath("/");
-
         response.addCookie(cookie);
-        return true;
+    }
+
+    public MiaoshaUser getByToken(HttpServletResponse response, String token) {
+        if (StringUtils.isEmpty(token)) {
+            return null;
+        }
+        MiaoshaUser user = redisService.get(MiaoshaUserKey.token, token, MiaoshaUser.class);
+        //延长有效期
+        if (user != null) {
+            addCookie(response, user);
+        }
+        return user;
     }
 }
